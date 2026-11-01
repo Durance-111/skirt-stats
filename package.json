@@ -1,0 +1,12 @@
+{
+  "name": "skirt-inquiry-stats",
+  "version": "1.0.0",
+  "description": "裙子询问人次统计 - 可分享到微信的实时协作统计工具",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
