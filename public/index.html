@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>裙子询问人次统计</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>👗 裙子询问人次统计</h1>
+    <div class="sync" id="syncBox">
+      <span class="dot" id="syncDot"></span>
+      <span id="syncText">同步中…</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- 录入表单 -->
+    <section class="card">
+      <h2 id="formTitle">➕ 添加记录</h2>
+      <form id="form">
+        <input type="hidden" id="editId" />
+        <label>日期
+          <input type="date" id="date" required />
+        </label>
+        <label>裙子名称
+          <input type="text" id="skirt" list="skirtList" placeholder="如：法式碎花连衣裙" required />
+          <datalist id="skirtList"></datalist>
+        </label>
+        <label>询问人次
+          <input type="number" id="count" min="0" step="1" placeholder="如：12" required />
+        </label>
+        <label>记录人（选填）
+          <input type="text" id="recorder" placeholder="如：小王" />
+        </label>
+        <div class="btn-row">
+          <button type="submit" class="primary" id="submitBtn">保存</button>
+          <button type="button" class="ghost" id="cancelBtn" style="display:none">取消编辑</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 汇总 -->
+    <section class="card">
+      <h2>📊 汇总</h2>
+      <div class="summary">
+        <div class="stat"><div class="num" id="sumCount">0</div><div class="lbl">总询问人次</div></div>
+        <div class="stat"><div class="num" id="sumRows">0</div><div class="lbl">记录条数</div></div>
+        <div class="stat"><div class="num" id="sumSkirts">0</div><div class="lbl">裙子款数</div></div>
+        <div class="stat"><div class="num" id="sumDays">0</div><div class="lbl">覆盖天数</div></div>
+      </div>
+    </section>
+
+    <!-- 按裙子排名 -->
+    <section class="card">
+      <h2>👑 各裙子总询问人次</h2>
+      <div id="ranking"><div class="empty">暂无数据</div></div>
+    </section>
+
+    <!-- 记录列表 -->
+    <section class="card">
+      <h2>📋 明细记录</h2>
+      <div class="filter">
+        <input type="text" id="search" placeholder="搜索 日期 / 裙子 / 记录人" />
+      </div>
+      <div class="table-wrap">
+        <table id="table">
+          <thead>
+            <tr><th>日期</th><th>裙子</th><th>人次</th><th>记录人</th><th>操作</th></tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div id="emptyList" class="empty" style="display:none">没有匹配的记录</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">数据自动同步，多人可见 · 每 3 秒刷新</footer>
+  <script src="app.js"></script>
+</body>
+</html>
