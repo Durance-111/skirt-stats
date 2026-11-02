@@ -474,17 +474,5 @@
     "pdate": "",
     "col": 0,
     "rec": "y"
-  },
-  {
-    "id": "mvypnjq0tm2gl",
-    "date": "2026-11-02",
-    "skirt": "__测试__",
-    "inq": 1,
-    "ren": 0,
-    "pdate": "",
-    "col": 0,
-    "rec": "test",
-    "createdAt": 1793590801560,
-    "updatedAt": null
   }
 ]
