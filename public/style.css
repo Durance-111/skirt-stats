@@ -10,6 +10,9 @@ body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Micros
 .sync{display:flex;align-items:center;gap:6px;font-size:12px;opacity:.95}
 .sync .dot{width:8px;height:8px;border-radius:50%;background:#fff;opacity:.5}
 .sync.on .dot{background:#7CFC00;opacity:1;box-shadow:0 0 6px #7CFC00}
+.store{font-size:11px;padding:2px 7px;border-radius:10px;margin-left:2px;font-weight:700}
+.store.ok{background:rgba(124,252,0,.22);color:#eaffd6}
+.store.warn{background:rgba(255,196,0,.25);color:#fff3c4}
 .tabs{position:sticky;top:0;z-index:20;display:flex;background:#fff;padding:8px;gap:6px;box-shadow:0 2px 8px rgba(0,0,0,.06);overflow-x:auto}
 .tab{flex:1;border:none;background:#f0f0f0;color:#666;border-radius:20px;padding:9px 2px;font-size:13px;font-weight:700;white-space:nowrap}
 .tab.active{background:var(--p);color:#fff}
