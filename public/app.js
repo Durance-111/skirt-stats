@@ -33,6 +33,7 @@ async function load(){
     RECORDS = (d.records || []).map(normalize);
     COSTS = d.costs || {};
     setSync(true);
+    setStore(d.persistence || 'local');
     const sig = JSON.stringify([RECORDS.length, COSTS, RECORDS.map(x=>x.id+x.inq).join(',')]);
     if (sig !== lastSig){ lastSig = sig; render(); }
   }catch(e){ setSync(false); }
@@ -40,6 +41,17 @@ async function load(){
 function setSync(on){
   $('syncBox').className = 'sync' + (on ? ' on' : '');
   $('syncText').textContent = on ? '已同步' : '连接失败';
+}
+function setStore(p){
+  const b = $('storeBadge');
+  const t = $('storeText');
+  if (p === 'github'){
+    if (b){ b.textContent = '☁️ 云端'; b.className = 'store ok'; }
+    if (t) t.textContent = 'GitHub 云存储已连接，重启不丢数据';
+  } else {
+    if (b){ b.textContent = '⚠️ 本地'; b.className = 'store warn'; }
+    if (t) t.textContent = '本地存储（重启可能丢失，建议配置云端）';
+  }
 }
 function postRecord(o){ return fetch(API+'/records',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}); }
 function putRecord(id,o){ return fetch(API+'/records/'+id,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}); }
