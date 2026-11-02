@@ -474,17 +474,5 @@
     "pdate": "",
     "col": 0,
     "rec": "y"
-  },
-  {
-    "id": "mvyptls3fwssz",
-    "date": "2026-11-03",
-    "skirt": "持久化测试ABC",
-    "inq": 7,
-    "ren": 0,
-    "pdate": "",
-    "col": 0,
-    "rec": "t",
-    "createdAt": 1793591084163,
-    "updatedAt": null
   }
 ]
