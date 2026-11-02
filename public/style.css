@@ -85,3 +85,13 @@ th{color:var(--mut);font-weight:600}
   table.resp td::before{content:attr(data-label);color:var(--mut);font-weight:600;text-align:left;flex:none}
   .sk-grid{grid-template-columns:1fr}          /* 裙子卡片改单列，点按更准 */
 }
+
+/* ===== 自定义下拉筛选（裙子名称选择） ===== */
+.combo-wrap{position:relative}
+.combo-list{display:none;position:absolute;top:100%;left:0;right:0;margin-top:4px;background:#fff;
+  border:1.5px solid #f3b6cd;border-radius:10px;box-shadow:0 8px 24px rgba(214,51,132,.16);
+  max-height:210px;overflow-y:auto;z-index:60;-webkit-overflow-scrolling:touch}
+.combo-item{padding:11px 13px;font-size:15px;color:#333;cursor:pointer;border-bottom:1px solid #fdeef5}
+.combo-item:last-child{border-bottom:none}
+.combo-item.on,.combo-item:active{background:#fdf0f6;color:#d63384;font-weight:600}
+@media (hover:hover){.combo-item:hover{background:#fdf0f6;color:#d63384}}
