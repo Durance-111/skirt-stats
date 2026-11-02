@@ -4,80 +4,146 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="format-detection" content="telephone=no" />
-  <title>裙子询问人次统计</title>
+  <title>👗 裙子经营统计</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <header class="topbar">
-    <h1>👗 裙子询问人次统计</h1>
-    <div class="sync" id="syncBox">
-      <span class="dot" id="syncDot"></span>
-      <span id="syncText">同步中…</span>
-    </div>
-  </header>
+<header class="topbar">
+  <h1>👗 裙子经营统计</h1>
+  <div class="sync" id="syncBox"><span class="dot" id="syncDot"></span><span id="syncText">同步中…</span></div>
+</header>
 
-  <main>
-    <!-- 录入表单 -->
+<nav class="tabs">
+  <button class="tab active" data-p="rec">📥 录入</button>
+  <button class="tab" data-p="over">📊 总览</button>
+  <button class="tab" data-p="hot">🔥 热度</button>
+  <button class="tab" data-p="det">📋 明细</button>
+  <button class="tab" data-p="team">🧑 人员</button>
+</nav>
+
+<main>
+  <!-- 录入 -->
+  <div class="panel show" id="p-rec">
+    <section class="card" style="background:#fff8fb">
+      <h2>💡 录入规则</h2>
+      <div class="note" style="margin:0">
+        · 询问那天，填「询问人次」<br>
+        · 有人预定，填「预定人数」+「预定日期」<br>
+        · 预定人数=0 时，「预定日期」留空即可<br>
+        · 回款先空着，收钱后在「明细」点「补款」填进去
+      </div>
+    </section>
+
     <section class="card">
       <h2 id="formTitle">➕ 添加记录</h2>
       <form id="form">
         <input type="hidden" id="editId" />
-        <label>日期
-          <input type="date" id="date" required />
-        </label>
-        <label>裙子名称
-          <input type="text" id="skirt" list="skirtList" placeholder="如：法式碎花连衣裙" required />
-          <datalist id="skirtList"></datalist>
-        </label>
-        <label>询问人次
-          <input type="number" id="count" min="0" step="1" placeholder="如：12" required />
-        </label>
-        <label>记录人（选填）
-          <input type="text" id="recorder" placeholder="如：小王" />
-        </label>
+        <div class="row2">
+          <label>日期（询问日）<input type="date" id="date" required></label>
+          <label>裙子名称<input type="text" id="skirt" list="sk" placeholder="如：法式碎花连衣裙" required></label>
+        </div>
+        <div class="row2">
+          <label>询问人次<input type="number" id="inq" min="0" placeholder="10" required></label>
+          <label>预定人数<input type="number" id="ren" min="0" placeholder="1"></label>
+        </div>
+        <div class="row2">
+          <label>预定日期（预定人数&gt;0 时填）<input type="date" id="pdate"></label>
+          <label>回款金额（可后补）<input type="number" id="col" min="0" placeholder="先空着"></label>
+        </div>
+        <div class="row2">
+          <label>记录人<input type="text" id="rec" placeholder="小美"></label>
+        </div>
         <div class="btn-row">
-          <button type="submit" class="primary" id="submitBtn">保存</button>
+          <button type="submit" class="primary" id="submitBtn">保存记录</button>
           <button type="button" class="ghost" id="cancelBtn" style="display:none">取消编辑</button>
         </div>
       </form>
+      <datalist id="sk"></datalist>
     </section>
 
-    <!-- 汇总 -->
     <section class="card">
-      <h2>📊 汇总</h2>
-      <div class="summary">
-        <div class="stat"><div class="num" id="sumCount">0</div><div class="lbl">总询问人次</div></div>
-        <div class="stat"><div class="num" id="sumRows">0</div><div class="lbl">记录条数</div></div>
-        <div class="stat"><div class="num" id="sumSkirts">0</div><div class="lbl">裙子款数</div></div>
-        <div class="stat"><div class="num" id="sumDays">0</div><div class="lbl">覆盖天数</div></div>
+      <h2>📁 裙子档案 · 采购成本</h2>
+      <div class="row2">
+        <input id="costSk" list="sk" placeholder="裙子名">
+        <input id="costVal" type="number" min="0" placeholder="进价 ¥">
+      </div>
+      <button type="button" class="ghost" id="addCost" style="margin-top:10px;width:auto;padding:9px 16px;font-size:13px">保存进价</button>
+      <div class="note">每个裙子填一次进价，算毛利时自动扣除。</div>
+    </section>
+  </div>
+
+  <!-- 总览 -->
+  <div class="panel" id="p-over">
+    <div class="pchips" id="persons-over"></div>
+    <section class="card">
+      <h2>📊 经营看板</h2>
+      <div class="kpis" id="kpis"></div>
+    </section>
+    <section class="card">
+      <h2>👑 各裙子：询问 vs 预定(下单)</h2>
+      <div class="chart" id="c1"></div>
+      <div class="legend"><span><i style="background:var(--inq)"></i>询问人次</span><span><i style="background:var(--ren)"></i>预定(下单)</span></div>
+    </section>
+    <section class="card">
+      <h2>💰 各裙子：成本 / 回款 / 毛利</h2>
+      <div class="chart" id="c3"></div>
+      <div class="legend"><span><i style="background:var(--cost)"></i>采购成本</span><span><i style="background:var(--col)"></i>回款</span><span><i style="background:var(--pro)"></i>毛利</span></div>
+    </section>
+    <section class="card">
+      <h2>🔝 预定转化率排行</h2>
+      <div class="chart" id="c4"></div>
+    </section>
+  </div>
+
+  <!-- 热度 -->
+  <div class="panel" id="p-hot">
+    <div class="pchips" id="persons-hot"></div>
+    <section class="card">
+      <h2>📈 整体按日期趋势</h2>
+      <div class="chart" id="c2"></div>
+      <div class="legend"><span><i style="background:var(--inq)"></i>询问</span><span><i style="background:var(--ren)"></i>预定(下单)</span><span><i style="background:var(--col)"></i>回款</span></div>
+    </section>
+    <section class="card">
+      <h2>🔥 裙子热度 · 点裙子看每日趋势</h2>
+      <div id="skirtGrid"></div>
+      <div id="skirtDetail" style="display:none">
+        <button class="ghost" id="backBtn" style="width:auto;padding:8px 14px;font-size:13px;margin-bottom:10px">← 返回裙子列表</button>
+        <div id="dTitle" style="font-weight:800;font-size:16px;margin-bottom:10px"></div>
+        <div class="kpis" id="dKpis" style="margin-bottom:12px"></div>
+        <div class="chart" id="dChart"></div>
+        <div class="legend"><span><i style="background:var(--inq)"></i>询问人次</span><span><i style="background:var(--ren)"></i>预定(下单)</span></div>
       </div>
     </section>
+  </div>
 
-    <!-- 按裙子排名 -->
+  <!-- 明细 -->
+  <div class="panel" id="p-det">
     <section class="card">
-      <h2>👑 各裙子总询问人次</h2>
-      <div id="ranking"><div class="empty">暂无数据</div></div>
-    </section>
-
-    <!-- 记录列表 -->
-    <section class="card">
-      <h2>📋 明细记录</h2>
-      <div class="filter">
-        <input type="text" id="search" placeholder="搜索 日期 / 裙子 / 记录人" />
-      </div>
+      <h2>📋 明细记录（回款可点「补款」后填）</h2>
+      <div class="filter"><input type="text" id="search" placeholder="搜索 日期 / 裙子 / 记录人"></div>
       <div class="table-wrap">
         <table id="table">
-          <thead>
-            <tr><th>日期</th><th>裙子</th><th>人次</th><th>记录人</th><th>操作</th></tr>
-          </thead>
+          <thead><tr><th>日期</th><th>裙子</th><th>询问</th><th>预定</th><th>回款</th><th>记录人</th><th>操作</th></tr></thead>
           <tbody id="tbody"></tbody>
         </table>
         <div id="emptyList" class="empty" style="display:none">没有匹配的记录</div>
       </div>
     </section>
-  </main>
+  </div>
+
+  <!-- 人员 -->
+  <div class="panel" id="p-team">
+    <div class="pchips" id="persons-team"></div>
+    <section class="card">
+      <h2 id="teamTitle">👥 全部人员</h2>
+      <div id="teamBody"></div>
+      <div class="note">「全部人员」里点某一行 → 只看该人的数据；再点顶部「全部」恢复。</div>
+    </section>
+  </div>
 
   <footer class="foot">数据自动同步，多人可见 · 每 3 秒刷新</footer>
-  <script src="app.js"></script>
+</main>
+
+<script src="app.js"></script>
 </body>
 </html>
