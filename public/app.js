@@ -161,7 +161,9 @@ function render(){
   renderPersons();
   renderTeam();
   renderTable();
-  $('sk').innerHTML=[...new Set([...RECORDS.map(r=>r.skirt),...Object.keys(COSTS)])].map(s=>`<option value="${esc(s)}">`).join('');
+  const skirtNames=[...new Set([...RECORDS.map(r=>r.skirt),...Object.keys(COSTS)])].filter(Boolean);
+  $('sk').innerHTML=skirtNames.map(s=>`<option value="${esc(s)}">`).join('');
+  comboSkirt.set(skirtNames); comboCost.set(skirtNames);
 }
 
 function renderSkirtGrid(a){
@@ -304,6 +306,33 @@ $('addCost').onclick=async()=>{
 $('backBtn').onclick=()=>{ $('skirtDetail').style.display='none'; $('skirtGrid').style.display='block'; curSkirt=null; renderSkirtGrid(agg()); };
 $('search').oninput=renderTable;
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.p));
+
+// ===== 自定义下拉筛选（微信内置浏览器不支持 datalist，故自绘） =====
+function makeCombo(input){
+  const wrap=document.createElement('div'); wrap.className='combo-wrap';
+  input.parentNode.insertBefore(wrap,input); wrap.appendChild(input);
+  const list=document.createElement('div'); list.className='combo-list'; wrap.appendChild(list);
+  let names=[];
+  const close=()=>{ list.style.display='none'; };
+  function open(){
+    const q=input.value.trim().toLowerCase();
+    const arr=names.filter(n=>!q||n.toLowerCase().includes(q)).slice(0,50);
+    if(!arr.length){ close(); return; }
+    list.innerHTML=arr.map(n=>`<div class="combo-item${n===input.value.trim()?' on':''}" data-v="${esc(n)}">${esc(n)}</div>`).join('');
+    list.style.display='block';
+  }
+  input.addEventListener('focus',open);
+  input.addEventListener('input',open);
+  input.addEventListener('blur',()=>setTimeout(close,120));
+  list.addEventListener('mousedown',e=>{
+    const it=e.target.closest('.combo-item'); if(!it) return;
+    e.preventDefault();               // 阻止 input 失焦先于选中
+    input.value=it.dataset.v; close();
+  });
+  return { set(n){ names=n; } };
+}
+const comboSkirt=makeCombo($('skirt'));
+const comboCost=makeCombo($('costSk'));
 
 // ===== 启动 =====
 resetForm();
