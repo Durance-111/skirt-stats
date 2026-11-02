@@ -59,29 +59,32 @@ function delRecord(id){ return fetch(API+'/records/'+id,{method:'DELETE'}); }
 function putCost(o){ return fetch(API+'/costs',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(o)}); }
 
 // ===== 图表 =====
+// 图表宽度随屏幕自适应：手机上按真实像素渲染，坐标文字清晰可读
+function chartW(){ const w=(window.innerWidth||360)-28; return Math.max(280, Math.min(w,680)); }
 function groupedBar(el,labels,series){
-  const W=600,H=260,pad=34,colGap=18;
+  const W=chartW(),H=260,pad=34,colGap=14;
   const max=Math.max(1,...series.flatMap(s=>s.data));
   const n=labels.length, gw=W-pad*2, gwid=gw/n, bw=(gwid-colGap)/series.length;
-  let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
+  let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:auto">`;
   for(let i=0;i<=4;i++){const y=pad+(H-pad*2)*i/4;s+=`<line x1="${pad}" y1="${y}" x2="${W-pad}" y2="${y}" stroke="#eee"/><text x="2" y="${y+4}" font-size="11" fill="#999">${Math.round(max*(4-i)/4)}</text>`;}
   labels.forEach((lab,i)=>{
     const gx=pad+gwid*i+colGap/2;
     series.forEach((ser,j)=>{
       const v=ser.data[i]||0, h=(H-pad*2)*v/max, x=gx+bw*j, y=H-pad-h;
-      s+=`<rect x="${x}" y="${y}" width="${bw-2}" height="${h}" rx="3" fill="${ser.color}"/>`;
+      s+=`<rect x="${x}" y="${y}" width="${Math.max(1,bw-3)}" height="${h}" rx="3" fill="${ser.color}"/>`;
     });
-    s+=`<text x="${pad+gwid*i+gwid/2}" y="${H-pad+16}" font-size="11" fill="#666" text-anchor="middle">${lab.length>5?lab.slice(0,5)+'…':lab}</text>`;
+    const lab2=lab.length>4?lab.slice(0,4)+'…':lab;
+    s+=`<text x="${pad+gwid*i+gwid/2}" y="${H-pad+16}" font-size="11" fill="#666" text-anchor="middle">${esc(lab2)}</text>`;
   });
   s+=`</svg>`; el.innerHTML=s;
 }
 function lineChart(el,labels,series){
-  const W=600,H=260,pad=34;
+  const W=chartW(),H=260,pad=34;
   const max=Math.max(1,...series.flatMap(s=>s.data));
   const n=labels.length, x=i=>pad+(W-pad*2)*i/(n-1||1);
-  let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
+  let s=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="width:100%;height:auto">`;
   for(let i=0;i<=4;i++){const y=pad+(H-pad*2)*i/4;s+=`<line x1="${pad}" y1="${y}" x2="${W-pad}" y2="${y}" stroke="#eee"/><text x="2" y="${y+4}" font-size="11" fill="#999">${Math.round(max*(4-i)/4)}</text>`;}
-  labels.forEach((lab,i)=>{ if(n>1) s+=`<text x="${x(i)}" y="${H-pad+16}" font-size="10" fill="#999" text-anchor="middle">${lab.slice(5)}</text>`;});
+  labels.forEach((lab,i)=>{ if(n>1) s+=`<text x="${x(i)}" y="${H-pad+16}" font-size="11" fill="#999" text-anchor="middle">${lab.slice(5)}</text>`;});
   series.forEach(ser=>{
     let d=''; ser.data.forEach((v,i)=>{const y=H-pad-(H-pad*2)*v/max; d+=(i?'L':'M')+x(i)+' '+y+' ';});
     s+=`<path d="${d}" fill="none" stroke="${ser.color}" stroke-width="2.5"/>`;
@@ -90,14 +93,15 @@ function lineChart(el,labels,series){
   s+=`</svg>`; el.innerHTML=s;
 }
 function hBars(el,items){
-  const W=600,H=Math.max(120,items.length*42+20),pad=10;
+  const W=chartW(),H=Math.max(120,items.length*42+20),pad=10,labW=92;
   const max=Math.max(1,...items.map(i=>i.value));
-  let s=`<svg viewBox="0 0 ${W} ${H}">`;
+  let s=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">`;
   items.forEach((it,i)=>{
-    const y=pad+i*42+18, w=(W-pad*2-90)*it.value/max;
-    s+=`<text x="${pad}" y="${y-4}" font-size="12" fill="#444">${esc(it.label.length>6?it.label.slice(0,6)+'…':it.label)}</text>`;
-    s+=`<rect x="${pad}" y="${y}" width="${w}" height="16" rx="8" fill="${it.color}"/>`;
-    s+=`<text x="${pad+w+6}" y="${y+13}" font-size="12" fill="#666">${it.value}%</text>`;
+    const y=pad+i*42+18, w=(W-pad*2-labW)*it.value/max;
+    const lab=it.label.length>7?it.label.slice(0,7)+'…':it.label;
+    s+=`<text x="${pad}" y="${y-4}" font-size="12" fill="#444">${esc(lab)}</text>`;
+    s+=`<rect x="${pad}" y="${y}" width="${Math.max(1,w)}" height="16" rx="8" fill="${it.color}"/>`;
+    s+=`<text x="${pad+Math.max(1,w)+6}" y="${y+13}" font-size="12" fill="#666">${it.value}%</text>`;
   });
   s+=`</svg>`; el.innerHTML=s;
 }
@@ -212,10 +216,10 @@ function renderTeam(){
     recs.forEach(r=>{ const s=bySk[r.skirt]||(bySk[r.skirt]={inq:0,ren:0,col:0}); s.inq+=r.inq; s.ren+=r.ren; s.col+=r.col; });
     const rows=Object.entries(bySk).sort((a,b)=>b[1].inq-a[1].inq);
     title.textContent='👤 '+curPerson+' · 各裙子明细';
-    let h='<table><thead><tr><th>裙子</th><th>咨询</th><th>下单</th><th>转化</th><th>回款</th></tr></thead><tbody>';
+    let h='<table class="resp"><thead><tr><th>裙子</th><th>咨询</th><th>下单</th><th>转化</th><th>回款</th></tr></thead><tbody>';
     if(!rows.length) h+='<tr><td colspan="5" style="text-align:center;color:#999">暂无记录</td></tr>';
     rows.forEach(([sk,s])=>{ const rate=s.inq?Math.round(s.ren/s.inq*100):0;
-      h+='<tr><td>'+esc(sk)+'</td><td>'+s.inq+'</td><td>'+s.ren+'</td><td>'+rate+'%</td><td>¥'+s.col+'</td></tr>'; });
+      h+='<tr><td data-label="裙子">'+esc(sk)+'</td><td data-label="咨询">'+s.inq+'</td><td data-label="下单">'+s.ren+'</td><td data-label="转化">'+rate+'%</td><td data-label="回款">¥'+s.col+'</td></tr>'; });
     h+='</tbody></table>';
     body.innerHTML=h;
   }else{
@@ -223,9 +227,9 @@ function renderTeam(){
     RECORDS.forEach(r=>{ if(!r.rec) return; const p=byP[r.rec]||(byP[r.rec]={inq:0,ren:0,col:0}); p.inq+=r.inq; p.ren+=r.ren; p.col+=r.col; });
     const rows=Object.entries(byP).sort((a,b)=>b[1].inq-a[1].inq);
     title.textContent='👥 全部人员 · 点某行只看TA';
-    let h='<table><thead><tr><th>人员</th><th>咨询</th><th>下单</th><th>转化</th><th>回款</th></tr></thead><tbody>';
+    let h='<table class="resp"><thead><tr><th>人员</th><th>咨询</th><th>下单</th><th>转化</th><th>回款</th></tr></thead><tbody>';
     rows.forEach(([p,s])=>{ const rate=s.inq?Math.round(s.ren/s.inq*100):0;
-      h+='<tr data-p="'+esc(p)+'" style="cursor:pointer"><td>'+esc(p)+'</td><td>'+s.inq+'</td><td>'+s.ren+'</td><td>'+rate+'%</td><td>¥'+s.col+'</td></tr>'; });
+      h+='<tr data-p="'+esc(p)+'" style="cursor:pointer"><td data-label="人员">'+esc(p)+'</td><td data-label="咨询">'+s.inq+'</td><td data-label="下单">'+s.ren+'</td><td data-label="转化">'+rate+'%</td><td data-label="回款">¥'+s.col+'</td></tr>'; });
     h+='</tbody></table>';
     body.innerHTML=h;
     body.querySelectorAll('tr[data-p]').forEach(tr=>tr.onclick=()=>{ curPerson=tr.dataset.p; render(); switchTab('team'); });
@@ -238,9 +242,9 @@ function renderTable(){
   $('emptyList').style.display = rows.length? 'none':'block';
   $('tbody').innerHTML=rows.map(r=>`
     <tr>
-      <td>${r.date}</td><td>${esc(r.skirt)}</td><td>${r.inq}</td><td>${r.ren||''}</td>
-      <td>¥${r.col||0}</td><td>${esc(r.rec||'')}</td>
-      <td><div class="op">
+      <td data-label="日期">${r.date}</td><td data-label="裙子">${esc(r.skirt)}</td><td data-label="询问">${r.inq}</td><td data-label="预定">${r.ren||''}</td>
+      <td data-label="回款">¥${r.col||0}</td><td data-label="记录人">${esc(r.rec||'')}</td>
+      <td data-label="操作"><div class="op">
         <button class="edit" data-edit="${r.id}">改</button>
         <button class="pay" data-pay="${r.id}">补款</button>
         <button class="del" data-del="${r.id}">删</button>
@@ -305,3 +309,4 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>switchTab(t.dataset.p
 resetForm();
 load();
 setInterval(load, 3000);
+let _rzT; window.addEventListener('resize',()=>{ clearTimeout(_rzT); _rzT=setTimeout(()=>{ if(RECORDS.length) render(); },200); });
